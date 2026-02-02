@@ -56,11 +56,14 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue"
+import { useRouter } from "vue-router"
 
-const isNewUser = ref(false)
-const userName = ref("")
-const password = ref("")
-const passwordConfirmed = ref("")
+const router = useRouter();
+
+const isNewUser = ref(false);
+const userName = ref("");
+const password = ref("");
+const passwordConfirmed = ref("");
 
 function toggleMode() {
     isNewUser.value = !isNewUser.value
@@ -85,8 +88,9 @@ function createUser() {
 
 function loginUser() {
     console.log("Logging in:", userName.value)
+    
     // TODO: API call to log in user
-    //redirige vers la liste des heros
+    router.push("/hero")
 }
 
 const isPasswordValid = computed(() => {
