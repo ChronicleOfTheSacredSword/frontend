@@ -1,5 +1,5 @@
-<template xmlns="http://www.w3.org/1999/html">
-  <div class="map-container">
+<template>
+  <div class="map-container" tabindex="0">
     <!-- Joueur (rond) -->
     <div class="player" :style="playerStyle"></div>
 
@@ -8,7 +8,7 @@
       <div v-for="cellId in ROWS * COLS" :key="cellId" class="cell"></div>
     </div>
 
-    <br />
+    <br>
 
     <button @click="savePosition">💾 Sauvegarder</button>
   </div>
@@ -23,84 +23,115 @@ interface Save {
   id_box: number
 }
 
-type Direction = 'up' | 'down' | 'left' | 'right'
+const props = defineProps<{
+  save?: Save
+}>()
 
-// Taille de la carte
+// -------------------------
+// CONFIG
+// -------------------------
+type Direction = 'up' | 'down' | 'left' | 'right'
 const ROWS = 4
 const COLS = 9
-
-// Taille visuelle
 const CELL_SIZE = 60
 const PLAYER_SIZE = 40
 
-// Position du joueur
-const playerRow = ref<number>(0)
-const playerCol = ref<number>(0)
+// -------------------------
+// PLAYER STATE
+// -------------------------
+const playerRow = ref(0)
+const playerCol = ref(0)
 
-// ID de la case (1 → 18)
-const playerCellId = computed<number>(() => {
-  return playerRow.value * COLS + playerCol.value + 1
-})
-
-// Style du joueur (position en pixels)
-const playerStyle = computed<Record<string, string>>(() => ({
+const playerCellId = computed(() => playerRow.value * COLS + playerCol.value + 1)
+const playerStyle = computed(() => ({
   transform: `translate(
     ${playerCol.value * CELL_SIZE + (CELL_SIZE - PLAYER_SIZE) / 2}px,
     ${playerRow.value * CELL_SIZE + (CELL_SIZE - PLAYER_SIZE) / 2}px
   )`,
 }))
 
-// Déplacement
-function move(direction: Direction): void {
+function setPlayerFromIdBox(id_box: number) {
+  const index = id_box - 1
+  playerRow.value = Math.floor(index / COLS)
+  playerCol.value = index % COLS
+}
+
+// -------------------------
+// MOVEMENT
+// -------------------------
+function move(direction: Direction) {
   switch (direction) {
     case 'up':
       playerRow.value = (playerRow.value - 1 + ROWS) % ROWS
       break
-
     case 'down':
       playerRow.value = (playerRow.value + 1) % ROWS
       break
-
     case 'left':
       playerCol.value = (playerCol.value - 1 + COLS) % COLS
       break
-
     case 'right':
       playerCol.value = (playerCol.value + 1) % COLS
       break
   }
-
-  // Vérification d'un monstre à chaque nouvelle case
   checkRandomMonster()
 }
 
-//Evenement apparition monstre
-function checkRandomMonster(): void {
-  const chance = Math.random() // nombre entre 0 et 1
-  if (chance <= 0.05) {
-    alert('⚔️ Un monstre apparaît !')
-    // TODO: appeler page combat
+function handleKeydown(e: KeyboardEvent) {
+  switch (e.key) {
+    case 'ArrowUp':
+      e.preventDefault()
+      move('up')
+      break
+    case 'ArrowDown':
+      e.preventDefault()
+      move('down')
+      break
+    case 'ArrowLeft':
+      e.preventDefault()
+      move('left')
+      break
+    case 'ArrowRight':
+      e.preventDefault()
+      move('right')
+      break
   }
 }
 
-// Sauvegarde
-function savePosition(): void {
-  localStorage.setItem('playerCellId', playerCellId.value.toString())
-  //TODO Sauvegarde dans le service Sauv
+// -------------------------
+// MONSTER EVENT
+// -------------------------
+function checkRandomMonster() {
+  if (Math.random() <= 0.05) {
+    alert('⚔️ Un monstre apparaît !')
+  }
 }
 
-// Restauration au chargement
+// -------------------------
+// SAVE
+// -------------------------
+function savePosition() {
+  const save: Save = {
+    id: 1,
+    id_map: 1,
+    id_box: playerCellId.value,
+  }
+  localStorage.setItem('playerSave', JSON.stringify(save))
+}
+
+// -------------------------
+// ON MOUNT
+// -------------------------
 onMounted(() => {
-  const savedCellId = localStorage.getItem('playerCellId')
-  if (savedCellId !== null) {
-    const id = Number(savedCellId) - 1
-    if (!Number.isNaN(id)) {
-      playerRow.value = Math.floor(id / COLS)
-      playerCol.value = id % COLS
+  if (props.save && props.save.id_box) {
+    setPlayerFromIdBox(props.save.id_box)
+  } else {
+    const saved = localStorage.getItem('playerSave')
+    if (saved) {
+      const saveObj: Save = JSON.parse(saved)
+      if (saveObj.id_box) setPlayerFromIdBox(saveObj.id_box)
     }
   }
-
-  //TODO Chargement de la sauvegarde du héros
 
   window.addEventListener('keydown', handleKeydown)
 })
@@ -108,24 +139,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
-
-// Déplacement clavier
-function handleKeydown(event: KeyboardEvent): void {
-  switch (event.key) {
-    case 'ArrowUp':
-      move('up')
-      break
-    case 'ArrowDown':
-      move('down')
-      break
-    case 'ArrowLeft':
-      move('left')
-      break
-    case 'ArrowRight':
-      move('right')
-      break
-  }
-}
 </script>
 
 <style scoped>
@@ -133,6 +146,7 @@ function handleKeydown(event: KeyboardEvent): void {
   position: relative;
   width: calc(9 * 60px);
   margin: 20px auto;
+  outline: none;
 }
 
 /* Grille */
@@ -161,15 +175,5 @@ function handleKeydown(event: KeyboardEvent): void {
   z-index: 10;
   pointer-events: none;
   transition: transform 0.2s ease-out;
-}
-
-/* Contrôles */
-.controls {
-  margin-top: 10px;
-}
-
-.controls button {
-  margin: 4px;
-  font-size: 18px;
 }
 </style>

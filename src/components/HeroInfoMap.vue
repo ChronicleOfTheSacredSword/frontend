@@ -33,7 +33,6 @@ const props = defineProps<{
   grid-template-columns: repeat(6, auto);
   flex-direction: column;
   width: 100%;
-  margin-left: 4rem;
   max-width: 600px;
   transition:
     transform 0.2s ease,

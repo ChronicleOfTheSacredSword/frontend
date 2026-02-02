@@ -1,8 +1,8 @@
-import { createRouter, createWebHistory } from "vue-router"
-import LoginPage from "../pages/LoginPage.vue"
-import HeroPage from "../pages/HeroPage.vue"
-import NotFound from "../pages/NotFound.vue"
-import WorldMap from '@/pages/WorldMap.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import LoginPage from '../pages/LoginPage.vue';
+import HeroPage from '../pages/HeroPage.vue';
+import NotFound from '../pages/NotFound.vue';
+import WorldMap from '../pages/WorldMap.vue';
 
 const routes = [
   {
@@ -29,11 +29,11 @@ const routes = [
     name: 'NotFound',
     component: NotFound,
   },
-]
+];
 
 const router = createRouter({
-    history: createWebHistory(),
-    routes,
-})
+  history: createWebHistory(),
+  routes,
+});
 
-export default router
+export default router;
