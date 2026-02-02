@@ -4,6 +4,10 @@ import HeroPage from "../pages/HeroPage.vue"
 import NotFound from "../pages/NotFound.vue"
 
 const routes = [
+	{
+        path: "/",
+        redirect: "/login",
+    },
     {
         path: "/login",
         name: "Login",
