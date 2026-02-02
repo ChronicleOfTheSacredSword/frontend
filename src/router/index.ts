@@ -18,7 +18,6 @@ const routes = [
         name: "Hero",
         component: HeroPage,
     },
-    // Catch-all 404 route
     {
         path: "/:pathMatch(.*)*",
         name: "NotFound",
